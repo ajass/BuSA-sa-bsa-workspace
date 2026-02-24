@@ -61,6 +61,16 @@ convert_file() {
         txt)
             pandoc "$input" -t markdown -o "$output" 2>/dev/null
             ;;
+        xlsx)
+            # Excel - convert all sheets
+            {
+                echo "# Excel: $(basename "$input" .xlsx)"
+                echo ""
+                echo "_Converted from Excel spreadsheet_"
+                echo ""
+                pandoc "$input" -t markdown 2>/dev/null
+            } > "$output" 2>/dev/null
+            ;;
         *)
             return 1
             ;;
@@ -112,6 +122,32 @@ find "$INPUT_DIR" -name "*.pptx" -type f 2>/dev/null | while read -r pptx; do
         ((CONVERTED++))
     else
         echo "  ✗ $pptx → FAILED"
+        ((FAILED++))
+    fi
+done
+
+# Convert Excel files
+echo "Converting Excel files..."
+find "$INPUT_DIR" -name "*.xlsx" -type f 2>/dev/null | while read -r xlsx; do
+    filename=$(basename "$xlsx" .xlsx)
+    output="$OUTPUT_DIR/${filename}.md"
+    
+    {
+        echo "# Excel: $filename"
+        echo ""
+        echo "_Converted from Excel spreadsheet_"
+        echo ""
+        echo "---"
+        echo ""
+        # Convert each sheet
+        pandoc "$xlsx" -t markdown 2>/dev/null
+    } > "$output"
+    
+    if [ $? -eq 0 ]; then
+        echo "  ✓ $xlsx → ${filename}.md"
+        ((CONVERTED++))
+    else
+        echo "  ✗ $xlsx → FAILED"
         ((FAILED++))
     fi
 done

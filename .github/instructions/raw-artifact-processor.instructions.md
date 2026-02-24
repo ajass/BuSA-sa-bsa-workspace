@@ -35,6 +35,7 @@ bash scripts/convert.sh
 | `.pdf` | Markdown |
 | `.docx` | Markdown |
 | `.pptx` | Markdown (with slide separation) |
+| `.xlsx` | Markdown (tables per sheet) |
 | `.md` | Copied |
 | `.csv` | Copied |
 | Images (`.png`, `.jpg`) | Markdown reference + image in `images/` |
