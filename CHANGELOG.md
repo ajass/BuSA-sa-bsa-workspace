@@ -16,10 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - raw-artifacts/images/ folder for converted images
 - Additional templates: meeting-notes, email-thread
 - raw-artifacts/README.md with file type reference
+- Windows support: convert.bat (CMD) and convert.ps1 (PowerShell)
 
 ### Changed
 - Updated discovery phase workflow with automatic conversion
 - Improved convert.sh with comprehensive error handling
+- Cross-platform support (macOS, Linux, Windows)
 
 ### Removed
 
