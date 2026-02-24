@@ -71,13 +71,34 @@ project-name/
 - VS Code with GitHub Copilot extension
 - GitHub Copilot subscription
 - Copilot instructions enabled
+- Pandoc (for file conversion): `brew install pandoc`
+
+## Automatic File Conversion
+
+Drop any file type into `raw-artifacts/` - the conversion script automatically converts to Markdown:
+
+| Input | Output |
+|-------|--------|
+| `.pdf` | Markdown |
+| `.docx` | Markdown |
+| `.pptx` | Markdown (with slide markers) |
+| `.xlsx` | Markdown (tables) |
+| `.md` | Copied |
+| `.csv` | Copied |
+| Images | Markdown reference + `images/` |
+
+Run conversion:
+```bash
+bash scripts/convert.sh
+```
 
 ## Setup
 
 1. Clone/copy this workspace structure
-2. Open in VS Code
-3. Ensure Copilot is enabled: `Cmd/Ctrl+Shift+P` → "Copilot: Enable"
-4. Verify instructions loaded: Copilot chat shows "instructions loaded"
+2. Install pandoc: `brew install pandoc`
+3. Open in VS Code
+4. Ensure Copilot is enabled: `Cmd/Ctrl+Shift+P` → "Copilot: Enable"
+5. Verify instructions loaded: Copilot chat shows "instructions loaded"
 
 ## Documentation
 

@@ -17,7 +17,12 @@ raw-artifacts/ → 01-discovery/ → 02-architecture/ → 03-environments/ → 0
 ### Step 1: Create Project Folder
 Copy the workspace structure to your project location.
 
-### Step 2: Drop Raw Context
+### Step 2: Install Prerequisites
+```bash
+brew install pandoc
+```
+
+### Step 3: Drop Raw Context
 Place context documents in `raw-artifacts/`:
 
 | File | Purpose | Required |
@@ -27,10 +32,26 @@ Place context documents in `raw-artifacts/`:
 | jira-export.csv | Existing requirements from Jira | Optional |
 | current-state-process.md | Current process flows | Yes |
 | constraints.md | Budget, timeline, technical limits | Yes |
+| *.pdf, *.docx, *.pptx, *.xlsx | Other documents | Auto-converted |
+
+**Supported file types** - just drop them in, they'll be auto-converted:
+- PDF documents
+- Word documents (.docx)
+- PowerPoint presentations (.pptx)
+- Excel spreadsheets (.xlsx)
+- Images (screenshots, diagrams)
+- Markdown, CSV, JSON
 
 **Tip**: Use the template files in `raw-artifacts/` as guides.
 
-### Step 3: Verify Context
+### Step 4: Run Conversion
+```bash
+bash scripts/convert.sh
+```
+
+This converts all files to Markdown in `raw-artifacts/converted/`.
+
+### Step 5: Verify Context
 Ensure you have:
 - Clear business problem statement
 - Identified stakeholders
@@ -51,7 +72,7 @@ In Copilot Chat, type:
 ```
 
 ### What Happens
-Copilot reads ALL files in `raw-artifacts/` and generates:
+Copilot runs `scripts/convert.sh` first (if not already run), then reads converted files from `raw-artifacts/converted/` and generates:
 
 | Output File | Contents |
 |-------------|----------|

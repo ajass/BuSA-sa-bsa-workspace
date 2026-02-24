@@ -8,22 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- New requirements templates
-- New architecture diagram types
-- Additional phase folder
+- Automatic file conversion scripts (scripts/convert.sh)
+- PPTX (PowerPoint) conversion support
+- Excel (.xlsx) conversion support
+- Image reference generation for diagrams/screenshots
+- Virtual environment support for Python converter
+- raw-artifacts/images/ folder for converted images
+- Additional templates: meeting-notes, email-thread
+- raw-artifacts/README.md with file type reference
 
 ### Changed
-- Modified discovery phase workflow
-- Updated NFR categories
-- Revised traceability matrix format
+- Updated discovery phase workflow with automatic conversion
+- Improved convert.sh with comprehensive error handling
 
 ### Removed
-- Removed legacy template
-- Deprecated phase
 
 ### Fixed
-- Fixed traceability gap in template
-- Corrected diagram syntax
 
 ---
 
