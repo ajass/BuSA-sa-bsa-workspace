@@ -23,10 +23,20 @@ Look for these file types in `raw-artifacts/`:
 ### Run the converter
 If unsupported files exist, execute the conversion script:
 
+**macOS / Linux:**
 ```bash
-# Shell script (recommended - uses pandoc)
 cd /path/to/project
 bash scripts/convert.sh
+```
+
+**Windows:**
+```cmd
+cd /path/to/project
+scripts\convert.bat
+```
+OR
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\convert.ps1
 ```
 
 **Supported conversions:**
@@ -35,7 +45,7 @@ bash scripts/convert.sh
 | `.pdf` | Markdown |
 | `.docx` | Markdown |
 | `.pptx` | Markdown (with slide separation) |
-| `.xlsx` | Markdown (tables per sheet) |
+| `.xlsx` | Markdown (tables) |
 | `.md` | Copied |
 | `.csv` | Copied |
 | Images (`.png`, `.jpg`) | Markdown reference + image in `images/` |

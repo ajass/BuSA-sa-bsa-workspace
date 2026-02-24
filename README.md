@@ -71,7 +71,7 @@ project-name/
 - VS Code with GitHub Copilot extension
 - GitHub Copilot subscription
 - Copilot instructions enabled
-- Pandoc (for file conversion): `brew install pandoc`
+- Pandoc (for file conversion)
 
 ## Automatic File Conversion
 
@@ -87,15 +87,29 @@ Drop any file type into `raw-artifacts/` - the conversion script automatically c
 | `.csv` | Copied |
 | Images | Markdown reference + `images/` |
 
-Run conversion:
+### Run Conversion
+
+**macOS / Linux:**
 ```bash
 bash scripts/convert.sh
+```
+
+**Windows:**
+```cmd
+scripts\convert.bat
+```
+OR
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\convert.ps1
 ```
 
 ## Setup
 
 1. Clone/copy this workspace structure
-2. Install pandoc: `brew install pandoc`
+2. Install pandoc:
+   - **macOS:** `brew install pandoc`
+   - **Windows:** `choco install pandoc` or download from [pandoc.org](https://pandoc.org/installing.html)
+   - **Linux:** `sudo apt install pandoc` or `sudo yum install pandoc`
 3. Open in VS Code
 4. Ensure Copilot is enabled: `Cmd/Ctrl+Shift+P` → "Copilot: Enable"
 5. Verify instructions loaded: Copilot chat shows "instructions loaded"

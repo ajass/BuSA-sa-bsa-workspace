@@ -19,7 +19,13 @@ Copy the workspace structure to your project location.
 
 ### Step 2: Install Prerequisites
 ```bash
+# macOS
 brew install pandoc
+
+# Windows (using Chocolatey)
+choco install pandoc
+
+# Windows (manual): https://pandoc.org/installing.html
 ```
 
 ### Step 3: Drop Raw Context
