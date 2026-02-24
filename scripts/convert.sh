@@ -1,14 +1,16 @@
 #!/bin/bash
 #
-# Raw Artifact Converter - Shell Script Version
+# Raw Artifact Converter
 # Usage: ./convert.sh
 #
-# This script converts common file types to Markdown for Copilot processing.
+# Converts PDF, DOCX, PPTX, images to Markdown for Copilot processing.
 # Requires: pandoc (install via: brew install pandoc)
 #
 
-INPUT_DIR="raw-artifacts"
-OUTPUT_DIR="raw-artifacts/converted"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+INPUT_DIR="$PROJECT_DIR/raw-artifacts"
+OUTPUT_DIR="$INPUT_DIR/converted"
 
 echo "========================================"
 echo "Raw Artifact Converter"
@@ -16,79 +18,164 @@ echo "========================================"
 
 # Check for pandoc
 if ! command -v pandoc &> /dev/null; then
-    echo "WARNING: pandoc not found. PDF/DOCX conversion will be limited."
-    echo "Install pandoc: brew install pandoc"
-    echo ""
+    echo "ERROR: pandoc not found."
+    echo "Install: brew install pandoc"
+    exit 1
 fi
+
+echo "Using pandoc: $(pandoc --version | head -1)"
+echo ""
 
 # Create output directory
 mkdir -p "$OUTPUT_DIR"
 
+# Create images directory
+mkdir -p "$INPUT_DIR/images"
+
+CONVERTED=0
+FAILED=0
+
+# Function to convert file
+convert_file() {
+    local input="$1"
+    local output="$2"
+    local ext="${input##*.}"
+    
+    # Skip if output already exists and is newer
+    if [ -f "$output" ] && [ "$input" -ot "$output" ]; then
+        return 0
+    fi
+    
+    # Convert based on type
+    case "${ext,,}" in
+        pdf)
+            pandoc "$input" -t markdown -o "$output" 2>/dev/null
+            ;;
+        docx)
+            pandoc "$input" -t markdown -o "$output" 2>/dev/null
+            ;;
+        pptx)
+            # PPTX needs special handling - extract slides
+            pandoc "$input" -t markdown -o "$output" --wrap=none 2>/dev/null
+            ;;
+        txt)
+            pandoc "$input" -t markdown -o "$output" 2>/dev/null
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+    
+    if [ $? -eq 0 ]; then
+        echo "  ✓ $input → $(basename "$output")"
+        ((CONVERTED++))
+    else
+        echo "  ✗ $input → FAILED"
+        ((FAILED++))
+    fi
+}
+
 # Convert PDF files
-if command -v pandoc &> /dev/null; then
-    find "$INPUT_DIR" -name "*.pdf" -type f 2>/dev/null | while read -r pdf; do
-        filename=$(basename "$pdf" .pdf)
-        echo "Converting PDF: $filename.pdf"
-        pandoc "$pdf" -t markdown -o "$OUTPUT_DIR/${filename}.md" 2>/dev/null
-        if [ $? -eq 0 ]; then
-            echo "  → Created: ${filename}.md"
-        else
-            echo "  → Failed: ${filename}.pdf"
-        fi
-    done
-fi
+echo "Converting PDFs..."
+find "$INPUT_DIR" -name "*.pdf" -type f 2>/dev/null | while read -r pdf; do
+    filename=$(basename "$pdf" .pdf)
+    convert_file "$pdf" "$OUTPUT_DIR/${filename}.md"
+done
 
 # Convert DOCX files
-if command -v pandoc &> /dev/null; then
-    find "$INPUT_DIR" -name "*.docx" -type f 2>/dev/null | while read -r docx; do
-        filename=$(basename "$docx" .docx)
-        echo "Converting DOCX: $filename.docx"
-        pandoc "$docx" -t markdown -o "$OUTPUT_DIR/${filename}.md" 2>/dev/null
-        if [ $? -eq 0 ]; then
-            echo "  → Created: ${filename}.md"
-        else
-            echo "  → Failed: ${filename}.docx"
-        fi
-    done
-fi
+echo "Converting DOCX files..."
+find "$INPUT_DIR" -name "*.docx" -type f 2>/dev/null | while read -r docx; do
+    filename=$(basename "$docx" .docx)
+    convert_file "$docx" "$OUTPUT_DIR/${filename}.md"
+done
 
-# Copy Markdown files
-find "$INPUT_DIR" -name "*.md" -type f 2>/dev/null | while read -r md; do
-    filename=$(basename "$md")
-    if [ "$md" != "$OUTPUT_DIR/$filename" ]; then
-        echo "Copying: $filename"
-        cp "$md" "$OUTPUT_DIR/$filename"
+# Convert PPTX files
+echo "Converting PPTX files..."
+find "$INPUT_DIR" -name "*.pptx" -type f 2>/dev/null | while read -r pptx; do
+    filename=$(basename "$pptx" .pptx)
+    
+    # Create markdown with slide separators
+    output="$OUTPUT_DIR/${filename}.md"
+    
+    {
+        echo "# Presentation: $filename"
+        echo ""
+        echo "_Converted from PowerPoint_"
+        echo ""
+        echo "---"
+        echo ""
+        pandoc "$pptx" -t markdown --wrap=none 2>/dev/null | sed 's/^# /## Slide: /'
+    } > "$output"
+    
+    if [ $? -eq 0 ]; then
+        echo "  ✓ $pptx → ${filename}.md"
+        ((CONVERTED++))
+    else
+        echo "  ✗ $pptx → FAILED"
+        ((FAILED++))
     fi
 done
 
+# Copy Markdown files
+echo "Copying Markdown files..."
+find "$INPUT_DIR" -maxdepth 1 -name "*.md" -type f 2>/dev/null | while read -r md; do
+    filename=$(basename "$md")
+    cp "$md" "$OUTPUT_DIR/$filename"
+    echo "  ✓ Copied: $filename"
+    ((CONVERTED++))
+done
+
 # Copy CSV files
-find "$INPUT_DIR" -name "*.csv" -type f 2>/dev/null | while read -r csv; do
+echo "Copying CSV files..."
+find "$INPUT_DIR" -maxdepth 1 -name "*.csv" -type f 2>/dev/null | while read -r csv; do
     filename=$(basename "$csv")
-    echo "Copying: $filename"
     cp "$csv" "$OUTPUT_DIR/$filename"
+    echo "  ✓ Copied: $filename"
+    ((CONVERTED++))
 done
 
 # Create image references
-mkdir -p "$INPUT_DIR/images"
-find "$INPUT_DIR" -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) 2>/dev/null | while read -r img; do
-    filename=$(basename "$img" | sed 's/\.[^.]*//')
-    ext=$(echo "$img" | sed 's/.*\.//')
-    echo "Creating image reference: $filename.$ext"
-    cat > "$OUTPUT_DIR/${filename}-image.md" << EOF
-# Image: $filename.$ext
+echo "Creating image references..."
+find "$INPUT_DIR" -maxdepth 1 -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" \) 2>/dev/null | while read -r img; do
+    filename=$(basename "$img")
+    name_only=$(echo "$filename" | sed 's/\.[^.]*//')
+    ext=$(echo "$filename" | sed 's/.*\.//')
+    
+    # Move image to images folder
+    mkdir -p "$INPUT_DIR/images"
+    mv "$img" "$INPUT_DIR/images/" 2>/dev/null || cp "$img" "$INPUT_DIR/images/" 2>/dev/null
+    
+    # Create markdown reference
+    cat > "$OUTPUT_DIR/${name_only}-image.md" << EOF
+# Image: $filename
 
-![${filename}](../raw-artifacts/images/$filename.$ext)
+![${filename}](../raw-artifacts/images/$filename)
 
 ## Description
 _TODO: Describe what this diagram/screenshot shows_
 
 ## Key Elements
 - _TODO: List key elements visible in image_
+
+## Slide/Page Reference
+_If this image is from a presentation, note which slide:_
 EOF
+    echo "  ✓ Image reference: $filename"
+    ((CONVERTED++))
 done
 
 echo ""
 echo "========================================"
-echo "Conversion complete!"
-echo "Output directory: $OUTPUT_DIR"
+echo "Conversion Summary"
 echo "========================================"
+echo "Converted: $CONVERTED files"
+if [ $FAILED -gt 0 ]; then
+    echo "Failed: $FAILED files"
+fi
+echo "Output: $OUTPUT_DIR"
+echo "========================================"
+
+# List output files
+echo ""
+echo "Output files:"
+ls -la "$OUTPUT_DIR" 2>/dev/null | tail -n +4

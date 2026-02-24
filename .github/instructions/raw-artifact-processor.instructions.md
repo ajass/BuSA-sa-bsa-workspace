@@ -24,16 +24,22 @@ Look for these file types in `raw-artifacts/`:
 If unsupported files exist, execute the conversion script:
 
 ```bash
-# Option 1: Shell script (requires pandoc)
+# Shell script (recommended - uses pandoc)
 cd /path/to/project
 bash scripts/convert.sh
-
-# Option 2: Python script
-cd /path/to/project
-python3 scripts/convert_artifacts.py --input raw-artifacts --output raw-artifacts/converted
 ```
 
-After running, Copilot should read from `raw-artifacts/converted/` instead of `raw-artifacts/`.
+**Supported conversions:**
+| Input | Output |
+|-------|--------|
+| `.pdf` | Markdown |
+| `.docx` | Markdown |
+| `.pptx` | Markdown (with slide separation) |
+| `.md` | Copied |
+| `.csv` | Copied |
+| Images (`.png`, `.jpg`) | Markdown reference + image in `images/` |
+
+After running, Copilot reads from `raw-artifacts/converted/`.
 
 ### Manual conversion fallback
 If conversion scripts fail or aren't available:
